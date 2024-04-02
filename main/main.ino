@@ -23,7 +23,9 @@ String device_name = "WordClock-ABCD";
 /* Wifi includes and globals */
 #include <WiFi.h>
 String ssid       = "Gilatwifi-MiX_0409";
-String password   = "0502021159";
+String password  = "0502021159";
+String countryCode = "IL";
+String city = "Haifa";
 
 /* Preferences */
 #include <Preferences.h>
@@ -200,8 +202,8 @@ void setup_preferences() {
     preferences.begin("credentials", false);
     //ssid = preferences.getString("ssid");
     //password = preferences.getString("password");
-    city = preferences.getString("city");
-    countryCode = preferences.getString("countryCode");
+    //city = preferences.getString("city");
+    //countryCode = preferences.getString("countryCode");
     gmtOffset_sec = preferences.getInt("gmtOffset", 0);
     alarmCount = preferences.getInt("alarmCount", 0);
 }
@@ -296,11 +298,28 @@ void alarm_loop(String day, int hour, int minute)
 
 void weather_loop()
 {
+  
   if (city.isEmpty() || countryCode.isEmpty()) {
     return;
   }
+  
   if ((millis() - weather_timer) > 60000) {
-      String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city +"," + countryCode +"&APPID=" + openWeatherMapApiKey + "&units=metric";
+
+      // Serial.print(F("CountryCode$$$: "));
+      // Serial.print(countryCode);
+      // Serial.print(F("city$$$: "));
+      // Serial.println(city);
+      
+      city.trim();
+      countryCode.trim();
+
+      String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=metric";
+      if (city == "Jerusalem" and countryCode == "IL")
+      {
+        Serial.println("Lasy chance");
+        serverPath = "http://api.openweathermap.org/data/2.5/weather?q=Jerusalem,IL&APPID=" + openWeatherMapApiKey + "&units=metric";
+      }
+      
       jsonBuffer = httpGETRequest(serverPath.c_str());
       //Serial.println(jsonBuffer);
       JSONVar myObject = JSON.parse(jsonBuffer);
@@ -311,7 +330,7 @@ void weather_loop()
       int temp = myObject["main"]["temp"];
       Serial.print(F("Country: "));
       Serial.print(countryCode);
-      Serial.print(F(", City: "));
+      Serial.print(F("City: "));
       Serial.println(city);
       Serial.print(F("Temperature: "));
       Serial.println(temp);

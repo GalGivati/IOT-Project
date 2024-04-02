@@ -2,10 +2,10 @@
 #include <Arduino_JSON.h>
 #include <HTTPClient.h>
 
-String openWeatherMapApiKey = "87d845b0b6cf29baa1a73cc34b067a95";
+String openWeatherMapApiKey = "a984709083050d06f192c2d24b5229ad";
 unsigned long weather_timer = -60000;
-String city = "";
-String countryCode = "";
+//String city = "Haifa";
+//String countryCode = "IL";
 String jsonBuffer;
 int currentTemperature = 0;
 int weatherCondition = 0;
