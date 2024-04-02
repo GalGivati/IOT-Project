@@ -21,8 +21,8 @@ void setup() {
 void getNameandPass(String output, String& net_name, String& pass)
 {
   int index = output.indexOf("+");
-  net_name = output.substring(5, index);
-  pass = output.substring(index+10);
+  net_name = output.substring(0, index);
+  pass = output.substring(index+1);
 }
 
 void loop() {

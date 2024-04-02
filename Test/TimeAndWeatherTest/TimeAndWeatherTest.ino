@@ -6,8 +6,8 @@
 #endif
 
 
-#define PIN        5 // On Trinket or Gemma, suggest changing this to 1
-#define NUMPIXELS 30 // Popular NeoPixel ring size
+#define PIN        26 // On Trinket or Gemma, suggest changing this to 1
+#define NUMPIXELS 63 // Popular NeoPixel ring size
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 #define DELAYVAL 500 // Time (in milliseconds) to pause between pixels
@@ -15,8 +15,8 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 // Networks includes and Global
 #include <WiFi.h>
 #include <HTTPClient.h>
-const char* ssid       = "OnePlus Nord";
-const char* password   = "eladeladronron";
+const char* ssid       = "Gilatwifi-MiX_0409";
+const char* password   = "0502021159";
 
 // Time includes and Global
 #include "time_utils.h"

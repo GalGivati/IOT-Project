@@ -4,8 +4,8 @@
 
 String openWeatherMapApiKey = "a984709083050d06f192c2d24b5229ad";
 unsigned long weather_timer = -60000;
-//String city = "Haifa";
-//String countryCode = "IL";
+String countryCode = "Haifa";
+String city = "IL";
 String jsonBuffer;
 int currentTemperature = 0;
 int weatherCondition = 0;
@@ -24,8 +24,8 @@ String httpGETRequest(const char* serverName) {
   String payload = "{}"; 
   
   if (httpResponseCode>0) {
-    Serial.print("HTTP Response code: ");
-    Serial.println(httpResponseCode);
+    // Serial.print("HTTP Response code: ");
+    // Serial.println(httpResponseCode);
     payload = http.getString();
   }
   else {
