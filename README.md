@@ -17,7 +17,8 @@ Afterwards, following functions can be controled by user:
 
 4. **Alarms**: <br>
 4.1. **Add Alarm**- the user can add alarms and the clock will blink its alarm icon the desired time. <br>
-4.2. **Remove Alarm**- the user can remove alarms. <br>
+4.2. **Stop Alarm**- the user can stop an alarm that ringed. <br>
+4.3. **Remove Alarm**- the user can remove alarms. <br>
 
 ## Folder Description:
 main- the source code for the esp side. <br>
