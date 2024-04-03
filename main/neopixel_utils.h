@@ -30,6 +30,10 @@ int night_end_min = -1;
 
 #include "lights.h"
 
+/*
+    This file handels all the pixels of the word clock and lights them accordingly to the time, weather and alarms.
+*/
+
 void setup_neopixel()
 {
     // These lines are specifically to support the Adafruit Trinket 5V 16 MHz.
@@ -42,7 +46,7 @@ void setup_neopixel()
 
 }
 
-//Sets the light in range a and b
+// Sets the light in range a and b
 void setLightinRange(int a, int b, uint32_t c = GREEN) {
   for (int i=a; i<= b; i++) {
     pixels.setPixelColor(i, c);
@@ -50,7 +54,7 @@ void setLightinRange(int a, int b, uint32_t c = GREEN) {
 }
 
 /*
-Sets the light in the words It,Is and O'clock
+    Sets the light in the words It,Is and O'clock
 */
 void setItIsOclock() {
   pixels.setPixelColor(62, day_words_color);
@@ -58,17 +62,15 @@ void setItIsOclock() {
   setLightinRange(13,15, day_words_color);
 }
 
+/*
+    Sets the light of the minutes with ascending/descanding color properly
+*/
 void setMinutes(int minute) {
-  // Past
   auto specific_color = day_asc_color;
   auto words_color = day_words_color;
-  // if is_night
-  // { words_color = night_words_color;
-  // }
   if (5 <= minute && minute <= 30) {
     setLightinRange(37,38, words_color);
   }
-  // TO
   else if (31 <= minute) {
     if (minute <= 55) {
       setLightinRange(44,44, words_color);
@@ -84,7 +86,6 @@ void setMinutes(int minute) {
   switch (minute)
   {
   case 5:
-    /* code */
     setLightinRange(48, 49, words_color);
     break;
   case 10:
@@ -106,12 +107,14 @@ void setMinutes(int minute) {
   default:
     break;
   }
-  //Minutes
   if (minute != 0 && minute != 30 && minute != 15) {
     setLightinRange(45,47, words_color);
   }
 }
 
+/*
+    Sets the hour words
+*/
 void setHour(int hour)
 {
   auto words_color = day_words_color;
@@ -177,6 +180,9 @@ void light_time(int hour, int minute)
   pixels.show();   // Send the updated pixel colors to the hardware.
 }
 
+/*
+    set color of weather conditions depend on the temprature
+*/
 void temperature_to_color(int temp) 
 {
   Serial.println(temp);

@@ -1,17 +1,19 @@
-//#include "bluetooth_utils.h"
 #include "neopixel_utils.h"
 #include "time_utils.h"
 #include "weather_utils.h"
 
+// ----------------------------------------------------------
+
+/*
+    defines and globals declaration
+*/
 
 #define DELAYVAL 500 // Time (in milliseconds) to pause between pixels
 
-/* Bluetooth
- 
- */
+/* Bluetooth includes and globals */
 #include "BluetoothSerial.h"
 BluetoothSerial SerialBT;
-String device_name = "WordClock-ABCD";
+String device_name = "WordClock-YRG";
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
@@ -22,14 +24,25 @@ String device_name = "WordClock-ABCD";
 
 /* Wifi includes and globals */
 #include <WiFi.h>
-String ssid       = ""; //"Gilatwifi-MiX_0409";
-String password  = ""; //"0502021159";
+String ssid       = "";
+String password  = "";
 
 
 /* Preferences */
 #include <Preferences.h>
 Preferences preferences;
 
+/*
+    end of defines and globals declaration
+*/
+
+// ----------------------------------------------------------
+
+/*
+    helper functions
+*/
+
+/* wifi credentials parser */
 void getNameandPass(String output)
 {
   int index = output.indexOf(",");
@@ -37,6 +50,7 @@ void getNameandPass(String output)
   password = output.substring(index+1);
 }
 
+/* location settings parser */
 void getCity(String output){
   int index = output.indexOf("+");
   city = output.substring(5, index);
@@ -44,6 +58,16 @@ void getCity(String output){
   Serial.println(city);
   Serial.println(countryCode);
 }
+
+/*
+    End of helper functions
+*/
+
+// ----------------------------------------------------------
+
+/*
+    Alarm handling functions
+*/
 
 void printAlarmCount() {
   Serial.print(F("AlarmCount = "));
@@ -59,6 +83,7 @@ String getAlarm(int index) {
   return preferences.getString(("alarm" + String(index)).c_str());
 }
 
+/* check if alarm exist and return its index if exist */
 int findAlarm(String alarm) {
   for (int i = 0; i < alarmCount; i++) {
     if (alarm == getAlarm(i)) {
@@ -68,18 +93,20 @@ int findAlarm(String alarm) {
   return -1;
 }
 
+/* add an alarm */
 void addAlarm(String alarm) {
   int index = findAlarm(alarm);
   if (index != -1) {
     return;
   }
-  putAlarm(alarmCount, alarm);
+  preferences.putString(("alarm" + String(alarmCount)).c_str(), alarm);
   alarmCount++;
   preferences.putInt("alarmCount", alarmCount);
   printAlarmCount();
   return;
 }
 
+/* remove an alarm */
 void removeAlarm(String alarm)
 {
   int index = findAlarm(alarm);
@@ -88,13 +115,14 @@ void removeAlarm(String alarm)
   }
   if (index != alarmCount -1) {
     String lastAlarm = getAlarm(alarmCount-1);
-    putAlarm(index, lastAlarm);
+    preferences.putString(("alarm" + String(index)).c_str(), lastAlarm);
   }
   alarmCount--;
   preferences.putInt("alarmCount", alarmCount);
   printAlarmCount();
 }
 
+/* stop an alarm */
 void stopAlarm(String alarm)
 {
   if (indexAlarm == -1) {
@@ -107,47 +135,61 @@ void stopAlarm(String alarm)
   alarmToStop = alarm;
 }
 
-void printColor(int r, int g, int b)
-{
-  Serial.print(F("R:"));
-  Serial.print(r);
-  Serial.print(F(" G:"));
-  Serial.print(g);
-  Serial.print(F(" B:"));
-  Serial.print(b);
-}
+/*
+    End of alarm handling functions
+*/
 
+// ----------------------------------------------------------
+
+/*
+    Setup functions
+*/
+
+/* Set theme for the words that descrive clock and lights the describe minutes- ascending and descending */
 void setTheme(String theme)
 {
   Serial.println(theme);
   JSONVar my_json = JSON.parse(theme);
   
-  int day_words_color_red = my_json["Day"]["Words"]["Red"];
-  int day_words_color_green = my_json["Day"]["Words"]["Green"];
-  int day_words_color_blue = my_json["Day"]["Words"]["Blue"];
-  day_words_color = pixels.Color(day_words_color_green,day_words_color_red, day_words_color_blue);
-  printColor(day_words_color_red, day_words_color_green, day_words_color_blue);
+  JSONVar words_json = my_json["Words"];
+  day_words_color = pixels.Color(words_json["Red"], words_json["Green"], words_json["Blue"]);
   
-  int day_asc_color_red = my_json["Day"]["Asc"]["Red"];
-  int day_asc_color_green = my_json["Day"]["Asc"]["Green"];
-  int day_asc_color_blue = my_json["Day"]["Asc"]["Blue"];
-  day_asc_color = pixels.Color(day_asc_color_green, day_asc_color_red, day_asc_color_blue);
+  JSONVar asc_minutes_json = my_json["Asc"];
+  day_asc_color = pixels.Color(asc_minutes_json["Red"], asc_minutes_json["Green"], asc_minutes_json["Blue"]);
   
-  int day_dsc_color_red = my_json["Day"]["Dsc"]["Red"];
-  int day_dsc_color_green = my_json["Day"]["Dsc"]["Green"];
-  int day_dsc_color_blue = my_json["Day"]["Dsc"]["Blue"];
-  day_dsc_color = pixels.Color(day_dsc_color_green, day_dsc_color_red, day_dsc_color_blue);
-  light_time(last_hour,last_minute);
+  JSONVar dsc_minutes_json = my_json["Dsc"];
+  day_dsc_color = pixels.Color(dsc_minutes_json["Red"], dsc_minutes_json["Green"], dsc_minutes_json["Blue"]);
 
-//  bool is_night_on = my_json["NightOn"];
-//
-//  if (is_night_on){
-//    String night_start_time = my_json["StartTime"];
-//    String night_end_time = my_json["EndTime"];
-//  }
+  light_time(last_hour,last_minute);
 }
 
+void setup_preferences() {
+    preferences.clear();
+    gmtOffset_sec = preferences.getInt("gmtOffset", 0);
+    alarmCount = preferences.getInt("alarmCount", 0);
+}
 
+/* setup the word clock */
+void setup() {
+  Serial.begin(9600);
+  setup_neopixel();
+  setup_preferences();
+  SerialBT.begin(device_name); // begin the bluetooth
+  setup_time();
+  pixels.clear(); // Set all pixel colors to 'off'
+}
+
+/*
+    End of setup functions
+*/
+
+// ----------------------------------------------------------
+
+/*
+    Loop functions
+*/
+
+/* bluetooth loop accepts user inputs and acts accordingly */
 void bluetooth_loop()
 {
   if (SerialBT.available()) {
@@ -195,30 +237,7 @@ void bluetooth_loop()
   }
 }
 
-/* End Bluetooth */
-
-void setup_preferences() {
-    preferences.clear();
-    preferences.begin("credentials", false);
-    //ssid = preferences.getString("ssid");
-    //password = preferences.getString("password");
-    //city = preferences.getString("city");
-    //countryCode = preferences.getString("countryCode");
-    gmtOffset_sec = preferences.getInt("gmtOffset", 0);
-    alarmCount = preferences.getInt("alarmCount", 0);
-}
-
-void setup() {
-  
-  // END of Trinket-specific code.
-  Serial.begin(9600);
-  setup_neopixel();
-  setup_preferences();
-  SerialBT.begin(device_name);
-  setup_time();
-  pixels.clear(); // Set all pixel colors to 'off'
-}
-
+/* time loop that displays the time on the word clock */
 void time_loop()
 {
   struct tm timeinfo;
@@ -229,7 +248,7 @@ void time_loop()
   int minute = timeinfo.tm_min;
   String day = dayNames[timeinfo.tm_wday];
 
-  // If time changed
+  // update the time if it's changed
   if (last_hour != hour || last_minute != minute) {
     last_hour = hour;
     last_minute = minute;
@@ -239,7 +258,7 @@ void time_loop()
   alarm_loop(day, hour, minute);
 }
 
-// Feder
+/* loop that controls all the alarms,  */
 void alarm_loop(String day, int hour, int minute)
 {
   if (alarmCount > 0) {
@@ -296,6 +315,7 @@ void alarm_loop(String day, int hour, int minute)
   }
 }
 
+/* weather loop that weather conditions the time on the word clock */
 void weather_loop()
 {
   
@@ -304,24 +324,8 @@ void weather_loop()
   }
   
   if ((millis() - weather_timer) > 60000) {
-
-      // Serial.print(F("CountryCode$$$: "));
-      // Serial.print(countryCode);
-      // Serial.print(F("city$$$: "));
-      // Serial.println(city);
-      
-      //city.trim();
-      //countryCode.trim();
-
-      // String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=metric";
-      // if (city == "Jerusalem" and countryCode == "IL")
-      // {
-      //   Serial.println("Lasy chance");
-      //   serverPath = "http://api.openweathermap.org/data/2.5/weather?q=Jerusalem,IL&APPID=" + openWeatherMapApiKey + "&units=metric";
-      // }
       String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=metric";
       jsonBuffer = httpGETRequest(serverPath.c_str());
-      //Serial.println(jsonBuffer);
       JSONVar myObject = JSON.parse(jsonBuffer);
   
        if (JSON.typeof(myObject) == "undefined") {
@@ -352,16 +356,16 @@ void weather_loop()
   }
 }
 
+/* main loop of the word clock */
 void loop() {
-  //show_all_lights();
-  bluetooth_loop();
-  if (WiFi.status() == WL_CONNECTED)
+  bluetooth_loop(); // wait for some inputs from bluetooth
+  if (WiFi.status() == WL_CONNECTED) // only if wifi exist display time and weather
   {
     time_loop();
     weather_loop();
     delay(1000);
   }
-  else{
+  else{ // not connected to wifi so keep trying to connect
     Serial.println(F("Not Connected to WIFI"));
     wifi_not_connected();
     if (!ssid.isEmpty() && !password.isEmpty()) {
@@ -378,3 +382,9 @@ void loop() {
     }
   }
 }
+
+/*
+    End of loop functions
+*/
+// ----------------------------------------------------------
+

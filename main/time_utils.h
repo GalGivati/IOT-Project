@@ -31,23 +31,9 @@ void timeavailable(struct timeval *t)
 
 void setup_time()
 {
-  // Setting up time
   Serial.println("Setting up time");
   sntp_set_time_sync_notification_cb( timeavailable );
-  /**
-   * NTP server address could be aquired via DHCP,
-   *
-   * NOTE: This call should be made BEFORE esp32 aquires IP address via DHCP,
-   * otherwise SNTP option 42 would be rejected by default.
-   * NOTE: configTime() function call if made AFTER DHCP-client run
-   * will OVERRIDE aquired NTP server address
-   */
-  sntp_servermode_dhcp(1);    // (optional)
-  /**
-   * This will set configured ntp servers and constant TimeZone/daylightOffset
-   * should be OK if your time zone does not need to adjust daylightOffset twice a year,
-   * in such a case time adjustment won't be handled automagicaly.
-   */
+  sntp_servermode_dhcp(1);
   configTime(gmtOffset_sec, 0, "pool.ntp.org", "time.nist.gov");
   Serial.println("Time setup done");
 }
