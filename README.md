@@ -22,7 +22,7 @@ Afterwards, following functions can be controled by user:
 ## Folder Description:
 main- the source code for the esp side. <br>
 test- test for all different clock and chip functionallity. <br>
-input formats- all user inputs formats. <br>
+input formats- the expected inputs format for the different functions requested by user. <br>
 
 ## Arduino/ESP32 libraries used in this project:
 - Wifi <br>
