@@ -10,19 +10,14 @@ First, the user should download bluetooth serial app and connect to the device n
 Afterwards, following functions can be controled by user:
 
 1. **Location settings**: user can provide city and country code of the location that he wants the time and weather to be displayed at.  <br>
-Format is- City: <city name>”+”<country_code>. e.g. City Haifa+IL
 
 2. **Network Settings**: user can provide the wifi credentials that he wants the clock to be connected. <br>
-Format is- SSID <network>"+"<password>. e.g. SSID TechSec+1234
 
 3. **Themes**: user can provide color theme for the clock words, the minutes ascending and the minutes descending. <br>
-Format is- Theme: {“Words”:{“Red”:0,”Green”:0,”Blue”:0}, ”Asc”: {“Red”:0,”Green”:0,”Blue”:0}, ”Desc”: {“Red”:0,”Green”:0,”Blue”:0}}
 
 4. **Alarms**: <br>
-4.1 **Add Alarm**- the user can add alarms and the clock will blink its alarm icon the desired time. <br>
-Format is- Alarm <Day>”- “<HOURS:MIN>. e.g. Alarm Sunday- 16:30 <br>
-4.2 **Remove Alarm**- the user can remove alarms. <br>
-Format is- Alarm <Day>”- “<HOURS:MIN>. e.g. RemoveAlram Sunday- 16:30 <br>
+4.1. **Add Alarm**- the user can add alarms and the clock will blink its alarm icon the desired time. <br>
+4.2. **Remove Alarm**- the user can remove alarms. <br>
 
 ## Folder Description:
 main- the source code for the esp side. <br>
