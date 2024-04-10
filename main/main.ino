@@ -99,7 +99,7 @@ void addAlarm(String alarm) {
   if (index != -1) {
     return;
   }
-  preferences.putString(("alarm" + String(alarmCount)).c_str(), alarm);
+  putAlarm(alarmCount, alarm);
   alarmCount++;
   preferences.putInt("alarmCount", alarmCount);
   printAlarmCount();
@@ -115,7 +115,7 @@ void removeAlarm(String alarm)
   }
   if (index != alarmCount -1) {
     String lastAlarm = getAlarm(alarmCount-1);
-    preferences.putString(("alarm" + String(index)).c_str(), lastAlarm);
+    putAlarm(index, lastAlarm);
   }
   alarmCount--;
   preferences.putInt("alarmCount", alarmCount);
@@ -152,19 +152,20 @@ void setTheme(String theme)
   JSONVar my_json = JSON.parse(theme);
   
   JSONVar words_json = my_json["Words"];
-  day_words_color = pixels.Color(words_json["Red"], words_json["Green"], words_json["Blue"]);
+  day_words_color = pixels.Color(words_json["Green"], words_json["Red"], words_json["Blue"]);
   
   JSONVar asc_minutes_json = my_json["Asc"];
-  day_asc_color = pixels.Color(asc_minutes_json["Red"], asc_minutes_json["Green"], asc_minutes_json["Blue"]);
+  day_asc_color = pixels.Color(asc_minutes_json["Green"], asc_minutes_json["Red"], asc_minutes_json["Blue"]);
   
   JSONVar dsc_minutes_json = my_json["Dsc"];
-  day_dsc_color = pixels.Color(dsc_minutes_json["Red"], dsc_minutes_json["Green"], dsc_minutes_json["Blue"]);
+  day_dsc_color = pixels.Color(dsc_minutes_json["Green"], dsc_minutes_json["Red"], dsc_minutes_json["Blue"]);
 
   light_time(last_hour,last_minute);
 }
 
 void setup_preferences() {
     preferences.clear();
+    preferences.begin("credentials", false);
     gmtOffset_sec = preferences.getInt("gmtOffset", 0);
     alarmCount = preferences.getInt("alarmCount", 0);
 }
